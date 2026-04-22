@@ -1,4 +1,4 @@
-const apiKey = "f0133e94263d448c963164120261904";
+const apiKey = "";
 
 let currentUnit = "C"; // default
 let currentData = null; // store latest weather
