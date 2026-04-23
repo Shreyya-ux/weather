@@ -1,4 +1,4 @@
-const apiKey = "f0133e94263d448c963164120261904";
+const apiKey = "";
 
 let currentUnit = "C"; // default
 let currentData = null; // store latest weather
@@ -73,67 +73,39 @@ navigator.geolocation.getCurrentPosition(showPosition);
 
 function showPosition(position){
 
-const lat = position.coords.latitude;
-const lon = position.coords.longitude;
+ fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("City not found");
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Name aur Temp update 
+            document.getElementById("name").innerText = data.name + ", " + data.sys.country;
+            document.getElementById("temp").innerText = Math.round(data.main.temp) + " °C";
 
-const url =
-`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`;
+           // --- Dynamic Weather Icon Mapping ---
+            const condition = data.weather[0].main.toLowerCase();
+            const weatherIconElement = document.getElementById("weather-icon");
 
-fetch(url)
-.then(res => res.json())
-.then(data => {
+            const iconMap = {
+                "clear": "☀️",
+                "clouds": "☁️",
+                "rain": "🌧️",
+                "drizzle": "🌦️",
+                "thunderstorm": "⛈️",
+                "snow": "❄️",
+                "mist": "🌫️",
+                "smoke": "💨",
+                "haze": "🌫️"
+            };
 
-updateWeather(data);
-
-});
-
-}
-
-
-document.getElementById("unit-toggle").addEventListener("click", function(){
-
-  if(!currentData) return; // no data yet
-
-  if(currentUnit === "C"){
-    currentUnit = "F";
-    this.innerText = "Switch to °C";
-  } else {
-    currentUnit = "C";
-    this.innerText = "Switch to °F";
-  }
-
-  updateWeather(currentData); // refresh display
-});
-
-
-
-// 🌙 DARK MODE TOGGLE
-const themeBtn = document.getElementById("theme-toggle");
-
-// Load saved theme (optional but recommended)
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark-mode");
-  themeBtn.innerText = "☀️ Light Mode";
-}
-
-// Toggle on click
-themeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-
-  if (document.body.classList.contains("dark-mode")) {
-    themeBtn.innerText = "☀️ Light Mode";
-    localStorage.setItem("theme", "dark");
-  } else {
-    themeBtn.innerText = "🌙 Dark Mode";
-    localStorage.setItem("theme", "light");
-  }
-});
-
-}
-// Function to trigger weather search when the Enter key is pressed
-document.getElementById("city").addEventListener("keypress", function (event) {
-  if (event.key === "Enter") {
-    event.preventDefault(); // Prevents the default action (like form submission)
-    getWeather(); // Calls your existing function to fetch weather data
-  }
-});
+            // Icon update
+            if (weatherIconElement) {
+                weatherIconElement.innerText = iconMap[condition] || "🌡️";
+            }
+        })
+        .catch(err => {
+            alert(err.message);
+        });
